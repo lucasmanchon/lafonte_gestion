@@ -24,7 +24,7 @@
             <label for="last_name" style="display: block; margin-top: 20px; margin-bottom: 5px; font-weight: 600;">Apellido:</label>
             <input type="text" id="last_name" name="last_name" required 
                    value="{{ employee.last_name if employee else '' }}"
-                   style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+                   oninput="this.value = this.value.toUpperCase()" style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
 
             <label for="dni" style="display: block; margin-top: 20px; margin-bottom: 5px; font-weight: 600;">DNI (Documento):</label>
             <input type="text" id="dni" name="dni" required 

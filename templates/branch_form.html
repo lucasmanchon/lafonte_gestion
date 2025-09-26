@@ -17,7 +17,7 @@
             <label for="name" style="display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Nombre de la Sucursal:</label>
             <input type="text" id="name" name="name" required 
                    value="{{ branch.name if branch else '' }}" 
-                   style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+                   oninput="this.value = this.value.toUpperCase()" style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
 
             <label for="address" style="display: block; margin-top: 20px; margin-bottom: 5px; font-weight: 600;">Dirección:</label>
             <input type="text" id="address" name="address" 

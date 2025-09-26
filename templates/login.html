@@ -73,7 +73,7 @@
         <form method="POST" action="{{ url_for('login') }}">
             <div class="input-group">
                 <label for="username" style="font-weight: 600;">Usuario</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" oninput="this.value = this.value.toLowerCase()" required>
             </div>
 
             <div class="input-group">

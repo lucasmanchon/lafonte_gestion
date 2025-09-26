@@ -63,7 +63,7 @@ class Employee(db.Model):
     # Relación: Permite acceder a los datos de la sucursal del empleado (e.g., employee.branch.name)
     branch = db.relationship('Branch')
 
-# NUEVO MODELO DE PERMISOS
+# MODELO DE PERMISOS
 class Permission(db.Model):
     __tablename__ = 'permission'
     # La combinación de rol y endpoint debe ser única
@@ -77,7 +77,6 @@ class Permission(db.Model):
 
 def create_initial_data():
     """Crea el usuario administrador si no existe."""
-    # Nota: Esta función SOLO se llama después de que las tablas han sido creadas (db upgrade)
     if db.session.query(User).filter(User.username == 'admin').first() is None:
         admin_user = User(username='admin', password='123', first_name='Super', last_name='Admin', role='admin', is_active=1)
         db.session.add(admin_user)
@@ -109,7 +108,7 @@ def check_permission(role, endpoint):
     
     return False
 
-# NUEVO DECORADOR UNIVERSAL DE PERMISOS
+# DECORADOR UNIVERSAL DE PERMISOS
 def requires_permission(f):
     """Decorador universal que usa la base de datos para verificar el permiso del rol."""
     @wraps(f)
@@ -119,13 +118,10 @@ def requires_permission(f):
              return redirect(url_for('login'))
              
         user_role = session.get('role')
-        
-        # El nombre del endpoint (función de Flask) es el permiso que buscamos
         required_endpoint = f.__name__ 
         
         # 2. Verificar Permiso
         if not check_permission(user_role, required_endpoint):
-            # Si el usuario no tiene el permiso, lo enviamos a la página principal
             flash(f"Acceso denegado. Tu rol '{user_role.capitalize()}' no tiene permiso para acceder a {required_endpoint.replace('_', ' ').title()}.", 'danger')
             return redirect(url_for('index')) 
             
@@ -137,8 +133,10 @@ def requires_permission(f):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        # Los campos de username y password se fuerzan a minúsculas en el HTML, 
+        # pero también validamos la entrada aquí.
+        username = request.form['username'].lower()
+        password = request.form['password'] # Contraseña no necesita minúsculas
         
         # Uso de SQLAlchemy para buscar el usuario (activo)
         user = db.session.query(User).filter(
@@ -149,7 +147,7 @@ def login():
 
         if user:
             session['logged_in'] = True
-            session['user_id'] = user.id # Guardamos el ID por si lo necesitamos
+            session['user_id'] = user.id 
             session['username'] = user.username
             session['role'] = user.role
             return redirect(url_for('index'))
@@ -178,26 +176,31 @@ def index():
 # ------------------ RUTAS DEL MÓDULO SUCURSALES ------------------
 
 @app.route('/branches')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def manage_branches():
     branches = db.session.query(Branch).order_by(Branch.name).all()
     return render_template('branches_list.html', branches=branches)
 
 @app.route('/branches/add', methods=['GET', 'POST'])
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def add_branch():
     if request.method == 'POST':
-        # CONVERSIÓN A MAYÚSCULAS
+        # FUERZA MAYÚSCULAS para uniformidad
         name = request.form['name'].upper() 
         address = request.form['address']
         city = request.form['city']
-                  
+        
         # Verificar duplicado
         if db.session.query(Branch).filter(Branch.name == name).first():
             error = "El nombre de la sucursal ya existe."
             return render_template('branch_form.html', form_title='Añadir Nueva Sucursal', error=error)
             
-        new_branch = Branch(name=name, address=address, city=city, is_active=1)
+        new_branch = Branch(
+            name=name, 
+            address=address, 
+            city=city, 
+            is_active=1 # ACTIVACIÓN AUTOMÁTICA
+        )
         db.session.add(new_branch)
         db.session.commit()
         
@@ -213,12 +216,12 @@ def add_branch():
     return render_template('branch_form.html', form_title='Añadir Nueva Sucursal')
 
 @app.route('/branches/edit/<int:branch_id>', methods=['GET', 'POST'])
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def edit_branch(branch_id):
     branch = db.session.query(Branch).get_or_404(branch_id)
 
     if request.method == 'POST':
-        # CONVERSIÓN A MAYÚSCULAS
+        # FUERZA MAYÚSCULAS para uniformidad
         name = request.form['name'].upper() 
         address = request.form['address']
         city = request.form['city']
@@ -240,7 +243,7 @@ def edit_branch(branch_id):
     return render_template('branch_form.html', branch=branch, form_title='Editar Sucursal')
 
 @app.route('/branches/delete/<int:branch_id>')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def delete_branch_route(branch_id):
     branch = db.session.query(Branch).get_or_404(branch_id)
     
@@ -259,14 +262,14 @@ def delete_branch_route(branch_id):
 # ------------------ RUTAS DEL MÓDULO EMPLEADOS ------------------
 
 @app.route('/employees')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def manage_employees():
     employees = db.session.query(Employee).order_by(Employee.last_name).all()
     return render_template('employees_list.html', employees=employees)
 
 @app.route('/employees/form', defaults={'employee_id': None}, methods=['GET', 'POST'])
 @app.route('/employees/form/<int:employee_id>', methods=['GET', 'POST'])
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def employee_form(employee_id):
     employee = None
     if employee_id:
@@ -277,17 +280,18 @@ def employee_form(employee_id):
     if request.method == 'POST':
         # 1. Recoger datos
         first_name = request.form['first_name']
+        # FUERZA MAYÚSCULAS para uniformidad
         last_name = request.form['last_name'].upper() 
         dni = request.form['dni']
         phone = request.form['phone']
         email = request.form['email']
-        # --- CONVERSIÓN DE FECHA CRÍTICA ---
+        
+        # CORRECCIÓN DE FECHA CRÍTICA: Convertir cadena a objeto date
         hiring_date_str = request.form['hiring_date']
         hiring_date = None
         if hiring_date_str:
-            # Convertir la cadena de texto ('YYYY-MM-DD') a objeto date
             hiring_date = datetime.strptime(hiring_date_str, '%Y-%m-%d').date()
-        # -----------------------------------
+        
         branch_id = request.form['branch_id']
         is_active = 1 if request.form.get('is_active') == 'on' else 0
         
@@ -299,8 +303,14 @@ def employee_form(employee_id):
         # 3. Crear o Actualizar
         if employee is None:
             employee = Employee(
-                first_name=first_name, last_name=last_name, dni=dni, phone=phone, email=email, 
-                hiring_date=hiring_date, branch_id=branch_id, is_active=is_active
+                first_name=first_name, 
+                last_name=last_name, 
+                dni=dni, 
+                phone=phone, 
+                email=email, 
+                hiring_date=hiring_date, 
+                branch_id=branch_id, 
+                is_active=1 # ACTIVACIÓN AUTOMÁTICA
             )
             db.session.add(employee)
         else:
@@ -320,7 +330,7 @@ def employee_form(employee_id):
     return render_template('employee_form.html', form_title=form_title, employee=employee, active_branches=all_branches)
 
 @app.route('/employees/deactivate/<int:employee_id>')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def deactivate_employee_route(employee_id):
     employee = db.session.query(Employee).get_or_404(employee_id)
     
@@ -333,14 +343,14 @@ def deactivate_employee_route(employee_id):
 # ------------------ RUTAS DEL MÓDULO USUARIOS ------------------
 
 @app.route('/users')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def manage_users():
     users = db.session.query(User).order_by(User.last_name).all()
     return render_template('users_list.html', users=users)
 
 @app.route('/users/form', defaults={'user_id': None}, methods=['GET', 'POST'])
 @app.route('/users/form/<int:user_id>', methods=['GET', 'POST'])
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def user_form(user_id):
     user = None
     if user_id:
@@ -370,7 +380,14 @@ def user_form(user_id):
             
         # 4. Crear o Actualizar
         if user is None:
-            user = User(username=username, password=password, first_name=first_name, last_name=last_name, role=role, is_active=is_active)
+            user = User(
+                username=username, 
+                password=password, 
+                first_name=first_name, 
+                last_name=last_name, 
+                role=role, 
+                is_active=1 # ACTIVACIÓN AUTOMÁTICA
+            )
             db.session.add(user)
         else:
             user.username = username
@@ -392,7 +409,7 @@ def user_form(user_id):
     return render_template('user_form.html', form_title=form_title, user=user, all_branches=all_branches)
 
 @app.route('/users/deactivate/<int:user_id>')
-@requires_permission # USO DEL NUEVO DECORADOR
+@requires_permission
 def deactivate_user_route(user_id):
     user = db.session.query(User).get_or_404(user_id)
     user.is_active = 0
@@ -454,12 +471,11 @@ def manage_permissions():
                            endpoints=endpoints_to_manage,
                            matrix=permission_matrix)
 
-# --- Ejecución y Datos Iniciales CORREGIDA (SOLUCIÓN) ---
+# --- Ejecución y Datos Iniciales ---
 
 if __name__ == '__main__':
     with app.app_context():
-        # Los datos iniciales SÓLO se crean cuando iniciamos el servidor principal,
-        # NO cuando ejecutamos los comandos de migración como 'flask db init'.
+        # Los datos iniciales SÓLO se crean cuando iniciamos el servidor principal.
         create_initial_data() 
         
     app.run(debug=True)
