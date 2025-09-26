@@ -1,1 +1,0 @@
-# lafonte_gestion
