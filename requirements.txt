@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 Flask
 Flask-Migrate          # Librería para integrar Alembic con Flask
 Flask-SQLAlchemy       # Librería ORM para una gestión de DB más limpia
+=======
+Flask
+>>>>>>> 2733819a16e868a8654c647f023a9b8628ca0f32

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Matriz de Permisos{% endblock %}
+
+{% block content %}
+    <h2><i class="fas fa-lock"></i> Gestión de Permisos Modulares</h2>
+    <p style="color: var(--primary-color);">Define qué **Rol** tiene acceso a qué **Módulo/Función** (Endpoint). El rol <b>Admin</b> siempre tiene acceso total.</p>
+    
+    <div class="card" style="overflow-x: auto; margin-top: 20px;">
+        <form method="POST">
+            <table style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--primary-color); background-color: var(--active-bg);">
+                        <th style="padding: 15px; text-align: left; width: 250px;">Módulo / Función</th>
+                        {% for role in roles %}
+                            {% if role != 'admin' %}
+                                <th style="padding: 15px; text-align: center; text-transform: capitalize;">{{ role }}</th>
+                            {% else %}
+                                <th style="padding: 15px; text-align: center; font-weight: 700;">{{ role }} (Total)</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for endpoint in endpoints %}
+                    <tr style="border-bottom: 1px solid var(--subtle-border); background-color: {% if loop.index is even %}#FAFAFA{% else %}white{% endif %};">
+                        
+                        {# Nombre del Endpoint (TRADUCIDO) #}
+                        {% set translations = {
+                            'manage_branches': 'Ver Sucursales',
+                            'add_branch': 'Crear Sucursal',
+                            'edit_branch': 'Editar Sucursal',
+                            'delete_branch_route': 'Desactivar Sucursal',
+                            'manage_users': 'Ver Usuarios',
+                            'user_form': 'Crear/Editar Usuarios',
+                            'deactivate_user_route': 'Desactivar Usuarios',
+                            'manage_employees': 'Ver Empleados',
+                            'employee_form': 'Crear/Editar Empleados',
+                            'deactivate_employee_route': 'Desactivar Empleados',
+                            'manage_permissions': 'Administrar Permisos'
+                        } %}
+                        <td style="padding: 10px; font-weight: 600; color: var(--text-dark);">
+                            {{ translations[endpoint] if endpoint in translations else endpoint }}
+                        </td>
+                        
+                        {% for role in roles %}
+                            <td style="padding: 10px; text-align: center;">
+                            
+                                {% if role == 'admin' %}
+                                    <span style="color: var(--success-color); font-weight: 700;"><i class="fas fa-check-circle"></i> SÍ</span>
+                                {% else %}
+                                    {% set checked = matrix.get((role, endpoint), false) %}
+                                    
+                                    <input type="checkbox" 
+                                           name="{{ role }}_{{ endpoint }}" 
+                                           {% if checked %}checked{% endif %}
+                                           style="transform: scale(1.3); cursor: pointer;">
+                                {% endif %}
+                                
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 30px; text-align: right;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 25px; font-size: 1rem;">
+                    <i class="fas fa-save"></i> Guardar Permisos
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

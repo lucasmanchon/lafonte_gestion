@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}La Fonte{% endblock %}</title>
+    <title>{% block title %}LA FONTE D´ORO{% endblock %}</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -134,7 +134,7 @@
         /* ---------------------------------------------------- */
         
         /* BOTONES (Animados y Sutiles) */
-        .btn { /* Se mantienen los estilos de botones */
+        .btn { 
             padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer;
             font-weight: 400; transition: all 0.2s ease-in-out; margin: 5px;
             display: inline-flex; align-items: center; text-decoration: none;
@@ -155,18 +155,31 @@
             margin-bottom: 20px;
         }
         
+        /* MENSAJES FLASH */
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .flash-danger {
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+        }
+        .flash-success {
+            background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+        }
+        
         /* RESPONSIVE: Adaptación a Móvil */
         @media screen and (max-width: 600px) {
             .sidebar {
-                width: 0; /* Sidebar empieza cerrado en móvil */
+                width: 0; 
             }
             #main-content {
-                margin-left: 0; /* Contenido ocupa todo el ancho */
+                margin-left: 0; 
             }
             header {
-                justify-content: flex-start; /* Logo y botón juntos */
+                justify-content: flex-start; 
             }
-            /* Cuando el sidebar se abre, el contenido no se desplaza, sino que el sidebar se superpone */
             body.sidebar-open #main-content {
                 margin-left: 0; 
             }
@@ -202,24 +215,31 @@
                 <i class="fas fa-home"></i> Inicio
             </a>
             
-            {# Sucursales: Visible si el rol es manager O admin #}
+            {# Sucursales #}
             {% if session.get('role') in ['manager', 'admin'] %}
                 <a href="{{ url_for('manage_branches') }}" class="{% if 'branches' in current_path %}active{% endif %}">
                     <i class="fas fa-map-marker-alt"></i> Sucursales
                 </a>
             {% endif %}
 
-            {# Empleados (NUEVO) #}
+            {# Empleados #}
             {% if session.get('role') in ['manager', 'admin'] %}
                 <a href="{{ url_for('manage_employees') }}" class="{% if 'employees' in current_path %}active{% endif %}">
                     <i class="fas fa-briefcase"></i> Empleados
                 </a>
             {% endif %}
             
-            {# Usuarios: Visible si el rol es manager O admin #}
+            {# Usuarios #}
             {% if session.get('role') in ['manager', 'admin'] %}
                 <a href="{{ url_for('manage_users') }}" class="{% if 'users' in current_path %}active{% endif %}">
                     <i class="fas fa-users"></i> Usuarios
+                </a>
+            {% endif %}
+            
+            {# Permisos (SOLO ADMIN) #}
+            {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('manage_permissions') }}" class="{% if 'permissions' in current_path %}active{% endif %}">
+                    <i class="fas fa-lock"></i> Permisos
                 </a>
             {% endif %}
 
@@ -235,12 +255,23 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="logo">
-                <h1>La Fonte</h1>
+                <h1>LA FONTE D´ORO</h1>
             </div>
         </div>
         </header>
     
     <main id="main-content">
+        {# Mostrar mensajes flash (usados para Denegación de Acceso y Borrado Seguro) #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </main>
 
@@ -262,7 +293,6 @@
         }
 
         function toggleNav() {
-            // Verifica si el sidebar está abierto o cerrado y actúa en consecuencia
             if (document.getElementById("mySidebar").style.width === "0px" || window.innerWidth < 600) {
                 openNav();
             } else {
@@ -270,7 +300,6 @@
             }
         }
         
-        // Mantener el estado del sidebar al recargar (solo en escritorio)
         window.onload = function() {
             if (window.innerWidth >= 600) {
                 const state = localStorage.getItem('sidebarState');
@@ -280,17 +309,12 @@
                     openNav();
                 }
             } else {
-                // Forzar cerrado en móvil
-                document.getElementById("mySidebar").style.width = "0";
-                document.getElementById("main-content").style.marginLeft = "0";
-                document.getElementById("main-header").style.marginLeft = "0";
+                closeNav();
             }
         }
         
-        // Ajustar el sidebar al cambiar el tamaño de la ventana (para móvil/escritorio)
         window.onresize = function() {
             if (window.innerWidth >= 600) {
-                // Vuelve a aplicar el estado guardado o abre por defecto en escritorio
                 const state = localStorage.getItem('sidebarState');
                  if (state === 'closed') {
                     closeNav();
@@ -298,7 +322,6 @@
                     openNav();
                 }
             } else {
-                // Forzar cerrado en móvil
                 closeNav();
             }
         }
