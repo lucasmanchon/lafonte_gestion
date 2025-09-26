@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Empleados{% endblock %}
+
+{% block content %}
+    <h2><i class="fas fa-briefcase"></i> Gestión de Empleados</h2>
+    
+    <a href="{{ url_for('employee_form') }}" class="btn btn-primary" style="margin-bottom: 20px;">
+        <i class="fas fa-user-plus"></i> Añadir Nuevo Empleado
+    </a>
+
+    <div class="card">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--subtle-border); background-color: var(--background-light);">
+                        <th style="padding: 15px; text-align: left;">Nombre Completo</th>
+                        <th style="padding: 15px; text-align: left;">DNI</th>
+                        <th style="padding: 15px; text-align: left;">Sucursal</th>
+                        <th style="padding: 15px; text-align: left;">Contacto</th>
+                        <th style="padding: 15px; text-align: center;">Estado</th>
+                        <th style="padding: 15px; text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr style="border-bottom: 1px solid var(--subtle-border); transition: background-color 0.2s;">
+                        <td style="padding: 15px; font-weight: 600;">{{ employee.first_name }} {{ employee.last_name }}</td>
+                        <td style="padding: 15px;">{{ employee.dni }}</td>
+                        <td style="padding: 15px; color: var(--secondary-color); font-weight: 600;">{{ employee.branch.name if employee.branch else 'N/A' }}</td>
+                        <td style="padding: 15px; font-size: 0.9rem;">{{ employee.email }} / {{ employee.phone }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            {% if employee.is_active %}
+                                <span style="color: var(--success-color);"><i class="fas fa-circle"></i> Activo</span>
+                            {% else %}
+                                <span style="color: var(--danger-color);"><i class="far fa-circle"></i> Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: right;">
+                            <a href="{{ url_for('employee_form', employee_id=employee.id) }}" class="btn" style="background-color: #E9ECEF; color: var(--primary-color); box-shadow: none; padding: 8px 12px;">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            {% if employee.is_active %}
+                                <a href="{{ url_for('deactivate_employee_route', employee_id=employee.id) }}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de DESACTIVAR a {{ employee.first_name }}?');" style="padding: 8px 12px;">
+                                    <i class="fas fa-user-slash"></i> Desactivar
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--primary-color);">No hay empleados registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

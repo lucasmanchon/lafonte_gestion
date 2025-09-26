@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Control{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2><i class="fas fa-chart-line"></i> Panel de Control</h2>
+        <p>Bienvenido, **{{ username }}** (Rol: {{ role }}). Utiliza el menú superior para navegar a los módulos de gestión.</p>
+    </div>
+
+    {% if role == 'manager' %}
+    <h3 style="margin-top: 40px; color: var(--primary-color);">Acceso Rápido</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        
+        <a href="{{ url_for('manage_branches') }}" class="btn btn-primary" style="background-color: var(--secondary-color);">
+            <i class="fas fa-map-marker-alt"></i> Gestión de Sucursales
+        </a>
+        
+        </div>
+    {% endif %}
+
+{% endblock %}

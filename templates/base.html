@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}La Fonte{% endblock %}</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* COLORES Y FUENTES - ESTILO MODERNO Y SUTIL */
+        :root {
+            --primary-color: #008080;   /* Teal Oscuro (Verde con Azul) */
+            --secondary-color: #A1887F; /* Marrón/Beige cálido (Cafetería) */
+            --background-light: #F8F9FA;/* Fondo muy claro */
+            --text-dark: #343A40;       /* Texto oscuro y definido */
+            --success-color: #28A745;   
+            --danger-color: #DC3545;    
+            --subtle-border: #DEE2E6;   
+            --sidebar-width: 250px;     /* Ancho del sidebar */
+            --active-bg: rgba(0, 128, 128, 0.1); /* Fondo activo sutil */
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            transition: margin-left 0.3s; /* Animación de desplazamiento del contenido */
+        }
+        
+        /* HEADINGS */
+        h1, h2 { font-weight: 600; color: var(--text-dark); }
+        
+        /* ---------------------------------------------------- */
+        /* SIDEBAR (MENÚ HAMBURGUESA) ESTILOS */
+        /* ---------------------------------------------------- */
+        .sidebar {
+            height: 100%;
+            width: var(--sidebar-width);
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar a {
+            padding: 10px 15px 10px 30px;
+            text-decoration: none;
+            font-size: 1rem;
+            color: var(--text-dark);
+            display: block;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .sidebar a:hover {
+            color: var(--primary-color);
+            background-color: #f1f1f1;
+        }
+        
+        /* RESALTAR PÁGINA ACTIVA */
+        .sidebar a.active {
+            background-color: var(--active-bg); /* Fondo sutil con color primario */
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color); /* Barra lateral para énfasis */
+            padding-left: 26px; /* Ajuste por la barra */
+        }
+        
+        /* CERRAR MENÚ (Botón X) */
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 15px;
+            font-size: 36px;
+            margin-left: 50px;
+            color: var(--danger-color);
+        }
+        
+        /* HEADER (Top Bar) */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            transition: margin-left 0.3s;
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color); 
+            font-weight: 600;
+        }
+        
+        /* Botón hamburguesa (para abrir) */
+        .openbtn {
+            font-size: 20px;
+            cursor: pointer;
+            background-color: transparent;
+            color: var(--primary-color);
+            padding: 10px 15px;
+            border: none;
+            margin-right: 15px;
+        }
+        
+        /* Contenido principal de la página */
+        #main-content {
+            transition: margin-left 0.3s;
+            padding: 20px;
+            margin-left: var(--sidebar-width); /* Empieza con el sidebar abierto */
+        }
+
+        /* ---------------------------------------------------- */
+        /* ESTILOS DE COMPONENTES GENERALES (Botones, Tarjetas, etc.) */
+        /* ---------------------------------------------------- */
+        
+        /* BOTONES (Animados y Sutiles) */
+        .btn { /* Se mantienen los estilos de botones */
+            padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 400; transition: all 0.2s ease-in-out; margin: 5px;
+            display: inline-flex; align-items: center; text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn i { margin-right: 8px; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #006666; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #BD2130; transform: translateY(-1px); }
+        
+        /* CONTENEDOR DE TARJETAS (Elegancia) */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* RESPONSIVE: Adaptación a Móvil */
+        @media screen and (max-width: 600px) {
+            .sidebar {
+                width: 0; /* Sidebar empieza cerrado en móvil */
+            }
+            #main-content {
+                margin-left: 0; /* Contenido ocupa todo el ancho */
+            }
+            header {
+                justify-content: flex-start; /* Logo y botón juntos */
+            }
+            /* Cuando el sidebar se abre, el contenido no se desplaza, sino que el sidebar se superpone */
+            body.sidebar-open #main-content {
+                margin-left: 0; 
+            }
+        }
+        
+        /* Clase para cuando el sidebar está cerrado en escritorio */
+        body.sidebar-closed .sidebar {
+            width: 0;
+        }
+        body.sidebar-closed #main-content, body.sidebar-closed header {
+            margin-left: 0;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        
+        <div style="padding: 0 15px 20px 30px; border-bottom: 1px solid var(--subtle-border);">
+             <p style="font-weight: 600; font-size: 1.1rem; color: var(--primary-color);">
+                 <i class="fas fa-user-circle"></i> {{ session.get('username', 'Invitado') }}
+             </p>
+             <p style="font-size: 0.8rem; text-transform: capitalize; margin-top: -15px;">
+                 Rol: {{ session.get('role', 'N/A') }}
+             </p>
+        </div>
+        
+        {% if session.get('logged_in') %}
+            {% set current_path = request.path %}
+            
+            <a href="{{ url_for('index') }}" class="{% if current_path == url_for('index') %}active{% endif %}">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            
+            {# Sucursales: Visible si el rol es manager O admin #}
+            {% if session.get('role') in ['manager', 'admin'] %}
+                <a href="{{ url_for('manage_branches') }}" class="{% if 'branches' in current_path %}active{% endif %}">
+                    <i class="fas fa-map-marker-alt"></i> Sucursales
+                </a>
+            {% endif %}
+
+            {# Empleados (NUEVO) #}
+            {% if session.get('role') in ['manager', 'admin'] %}
+                <a href="{{ url_for('manage_employees') }}" class="{% if 'employees' in current_path %}active{% endif %}">
+                    <i class="fas fa-briefcase"></i> Empleados
+                </a>
+            {% endif %}
+            
+            {# Usuarios: Visible si el rol es manager O admin #}
+            {% if session.get('role') in ['manager', 'admin'] %}
+                <a href="{{ url_for('manage_users') }}" class="{% if 'users' in current_path %}active{% endif %}">
+                    <i class="fas fa-users"></i> Usuarios
+                </a>
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}" style="color: var(--danger-color); border-top: 1px solid var(--subtle-border); margin-top: 10px;">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </a>
+        {% endif %}
+    </div>
+
+    <header id="main-header">
+        <div style="display: flex; align-items: center;">
+            <button class="openbtn" onclick="toggleNav()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <h1>La Fonte</h1>
+            </div>
+        </div>
+        </header>
+    
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "var(--sidebar-width)";
+            document.getElementById("main-content").style.marginLeft = "var(--sidebar-width)";
+            document.getElementById("main-header").style.marginLeft = "var(--sidebar-width)";
+            document.body.classList.remove('sidebar-closed');
+            localStorage.setItem('sidebarState', 'open');
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.getElementById("main-content").style.marginLeft = "0";
+            document.getElementById("main-header").style.marginLeft = "0";
+            document.body.classList.add('sidebar-closed');
+            localStorage.setItem('sidebarState', 'closed');
+        }
+
+        function toggleNav() {
+            // Verifica si el sidebar está abierto o cerrado y actúa en consecuencia
+            if (document.getElementById("mySidebar").style.width === "0px" || window.innerWidth < 600) {
+                openNav();
+            } else {
+                closeNav();
+            }
+        }
+        
+        // Mantener el estado del sidebar al recargar (solo en escritorio)
+        window.onload = function() {
+            if (window.innerWidth >= 600) {
+                const state = localStorage.getItem('sidebarState');
+                if (state === 'closed') {
+                    closeNav();
+                } else {
+                    openNav();
+                }
+            } else {
+                // Forzar cerrado en móvil
+                document.getElementById("mySidebar").style.width = "0";
+                document.getElementById("main-content").style.marginLeft = "0";
+                document.getElementById("main-header").style.marginLeft = "0";
+            }
+        }
+        
+        // Ajustar el sidebar al cambiar el tamaño de la ventana (para móvil/escritorio)
+        window.onresize = function() {
+            if (window.innerWidth >= 600) {
+                // Vuelve a aplicar el estado guardado o abre por defecto en escritorio
+                const state = localStorage.getItem('sidebarState');
+                 if (state === 'closed') {
+                    closeNav();
+                } else {
+                    openNav();
+                }
+            } else {
+                // Forzar cerrado en móvil
+                closeNav();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+Flask
+Flask-Migrate          # Librería para integrar Alembic con Flask
+Flask-SQLAlchemy       # Librería ORM para una gestión de DB más limpia

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+    <h2><i class="fas fa-user-edit"></i> {{ form_title }}</h2>
+    
+    {% if error %}
+        <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-weight: 600;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <form method="POST">
+            
+            <h3 style="color: var(--primary-color); border-bottom: 1px solid var(--subtle-border); padding-bottom: 10px;">Datos de Acceso</h3>
+            
+            <label for="username" style="display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Nombre de Usuario (Login):</label>
+            <input type="text" id="username" name="username" required 
+                   value="{{ user.username if user else '' }}" 
+                   style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+
+            <label for="password" style="display: block; margin-top: 20px; margin-bottom: 5px; font-weight: 600;">Contraseña: {% if user %} (Dejar vacío para no cambiar) {% else %} (Obligatoria) {% endif %}</label>
+            <input type="password" id="password" name="password" 
+                   {% if not user %}required{% endif %}
+                   style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+
+            <h3 style="color: var(--primary-color); border-bottom: 1px solid var(--subtle-border); padding-bottom: 10px; margin-top: 30px;">Datos Personales y Rol</h3>
+
+            <div style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="first_name" style="display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Nombre:</label>
+                    <input type="text" id="first_name" name="first_name" required 
+                           value="{{ user.first_name if user else '' }}" 
+                           style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+                </div>
+                <div style="flex: 1;">
+                    <label for="last_name" style="display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Apellido:</label>
+                    <input type="text" id="last_name" name="last_name" 
+                           value="{{ user.last_name if user else '' }}"
+                           style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+                </div>
+            </div>
+
+            <label for="role" style="display: block; margin-top: 20px; margin-bottom: 5px; font-weight: 600;">Rol de Usuario:</label>
+            <select id="role" name="role" required 
+                    style="width: 100%; padding: 10px; border: 1px solid var(--subtle-border); border-radius: 4px;">
+                
+                {% set current_role = user.role if user else 'common' %}
+                
+                <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Administrador (Acceso total)</option>
+                <option value="manager" {% if current_role == 'manager' %}selected{% endif %}>Encargado/Gerente (Gestión operativa)</option>
+                <option value="common" {% if current_role == 'common' %}selected{% endif %}>Usuario Común (Operaciones diarias)</option>
+                <option value="read_only" {% if current_role == 'read_only' %}selected{% endif %}>Solo Lectura (Reportes)</option>
+            </select>
+            
+            {% if user %}
+                <div style="margin-top: 25px; display: flex; align-items: center; padding: 10px; background-color: #F0F2F5; border-radius: 4px;">
+                    <input type="checkbox" id="is_active" name="is_active" 
+                           {% if user.is_active %}checked{% endif %}
+                           style="margin-right: 15px; transform: scale(1.4);">
+                    <label for="is_active" style="font-weight: 600; color: var(--text-dark);">Usuario Activo (Desmarca para desactivar)</label>
+                </div>
+            {% endif %}
+
+            <h3 style="color: var(--primary-color); border-bottom: 1px solid var(--subtle-border); padding-bottom: 10px; margin-top: 30px;">Asignación de Sucursales</h3>
+            <p style="font-size: 0.9rem; color: #6C757D;">Selecciona las sucursales que este usuario podrá gestionar/ver datos.</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; border: 1px solid var(--subtle-border); padding: 15px; border-radius: 4px;">
+                {% for branch in all_branches %}
+                    <div style="display: flex; align-items: center; width: calc(50% - 15px);">
+                        <input type="checkbox" id="branch_{{ branch.id }}" name="branch_id" value="{{ branch.id }}"
+                               {% if branch.id in assigned_branch_ids %}checked{% endif %}
+                               style="margin-right: 10px; transform: scale(1.2);">
+                        <label for="branch_{{ branch.id }}">{{ branch.name }}</label>
+                        {% if not branch.is_active %}
+                            <span style="color: var(--danger-color); font-size: 0.8rem; margin-left: 10px;">(Inactiva)</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--danger-color);">No hay sucursales activas. Crea una primero.</p>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 20px; font-size: 1rem;">
+                    <i class="fas fa-save"></i> Guardar Usuario
+                </button>
+                <a href="{{ url_for('manage_users') }}" class="btn" style="background-color: var(--subtle-border); color: var(--text-dark); box-shadow: none; padding: 12px 20px;">
+                    <i class="fas fa-times-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

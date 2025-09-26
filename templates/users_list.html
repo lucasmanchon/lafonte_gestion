@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+    <h2><i class="fas fa-users"></i> Gestión de Usuarios</h2>
+    
+    <a href="{{ url_for('user_form') }}" class="btn btn-primary" style="margin-bottom: 20px;">
+        <i class="fas fa-user-plus"></i> Añadir Nuevo Usuario
+    </a>
+
+    <div class="card">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--subtle-border); background-color: var(--background-light);">
+                        <th style="padding: 15px; text-align: left;">Usuario</th>
+                        <th style="padding: 15px; text-align: left;">Nombre Completo</th>
+                        <th style="padding: 15px; text-align: center;">Rol</th>
+                        <th style="padding: 15px; text-align: center;">Sucursales Asignadas</th>
+                        <th style="padding: 15px; text-align: center;">Estado</th>
+                        <th style="padding: 15px; text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr style="border-bottom: 1px solid var(--subtle-border); transition: background-color 0.2s;">
+                        <td style="padding: 15px; font-weight: 600;">{{ user.username }}</td>
+                        <td style="padding: 15px;">{{ user.first_name }} {{ user.last_name }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="font-weight: 600; text-transform: capitalize;">{{ user.role }}</span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            {# Llamada a una función de Jinja para obtener las sucursales (no la implementamos por simplicidad, pero se haría así) #}
+                            <span style="font-size: 0.85rem; color: var(--primary-color);">Ver asignaciones (Futuro)</span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            {% if user.is_active %}
+                                <span style="color: var(--success-color);"><i class="fas fa-circle"></i> Activo</span>
+                            {% else %}
+                                <span style="color: var(--danger-color);"><i class="far fa-circle"></i> Desactivado</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: right;">
+                            <a href="{{ url_for('user_form', user_id=user.id) }}" class="btn" style="background-color: #E9ECEF; color: var(--primary-color); box-shadow: none; padding: 8px 12px;">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            {% if user.is_active %}
+                                <a href="{{ url_for('deactivate_user_route', user_id=user.id) }}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de DESACTIVAR a {{ user.username }}?');" style="padding: 8px 12px;">
+                                    <i class="fas fa-user-slash"></i> Desactivar
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--primary-color);">No hay usuarios registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+    <style>
+        /* Estilo específico para la tarjeta de login, siguiendo la estética de base.html */
+        .login-container {
+            max-width: 350px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .login-container h2 {
+            color: var(--secondary-color);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid var(--subtle-border);
+            border-radius: 4px;
+            box-sizing: border-box; 
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--secondary-color); 
+            color: white;
+            padding: 14px 20px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .btn-login:hover {
+             background-color: #8D7266;
+             transform: translateY(-1px);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            margin-bottom: 15px;
+        }
+    </style>
+    
+    <div class="login-container">
+        <h2><i class="fas fa-lock"></i> Acceso La Fonte</h2>
+        
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="input-group">
+                <label for="username" style="font-weight: 600;">Usuario</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password" style="font-weight: 600;">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+        </form>
+        <p style="margin-top: 20px; font-size: 0.85rem; color: #6C757D;">**Usuario de prueba: admin | Contraseña: 123**</p>
+    </div>
+{% endblock %}
